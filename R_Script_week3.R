@@ -111,3 +111,21 @@ pedestrian %>%
   labs(title="Visual comparison of the 6 trajectories")
   
 ## Colors don't work with all kinds of: scale_fill_distiller(palette="Spectral")
+
+#Task 6
+install.packages("SimilarityMeasures")
+help(package = "SimilarityMeasures")
+
+pedestrian_new <- pedestrian %>%
+  group_by(TrajID) %>%
+  summarise(dim=sqrt((E-lead(E,1))^2+(N-lead(N,1))^2))
+
+traj1 <- pedestrian_new %>%
+  filter(TrajID==1)
+traj1 <- as.matrix(traj1)
+
+traj2 <- pedestrian_new %>%
+  filter(TrajID==2)
+traj2 <- as.matrix(traj2)
+
+SimilarityMeasures::DTW(traj1,traj2,pointSpacing=-1)
