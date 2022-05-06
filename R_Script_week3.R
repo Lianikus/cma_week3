@@ -66,3 +66,34 @@ caro60 %>%
   geom_point() +
   coord_equal() +
   theme(legend.position = "bottom")
+
+#function
+rle_id <- function(vec){
+  x <- rle(vec)$lengths
+  as.factor(rep(seq_along(x), times=x))
+}
+#segments
+caro60 <- caro60 %>%
+  mutate(segment_id = rle_id(static))
+
+#visualize all segments
+caro60_clean <- caro60 %>%
+  group_by(segment_id) %>%
+  rowwise() %>%
+  filter(stepMean>5) %>%
+  ungroup()
+
+par(mfrow=c(2,1))
+caro60 %>%
+  ggplot(aes(E, N, colour=segment_id))  +
+  geom_path() +
+  geom_point() +
+  coord_equal() +
+  theme(legend.position = "bottom") + labs(title="All segments")
+
+caro60_clean %>%
+  ggplot(aes(E, N, colour=segment_id))  +
+  geom_path() +
+  geom_point() +
+  coord_equal() +
+  theme(legend.position = "bottom") + labs(title = "Segments > 5 Minutes")
