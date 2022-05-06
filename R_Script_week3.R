@@ -97,3 +97,17 @@ caro60_clean %>%
   geom_point() +
   coord_equal() +
   theme(legend.position = "bottom") + labs(title = "Segments > 5 Minutes")
+
+
+#Task 5
+pedestrian <- read_delim(as.tibble("pedestrian.csv"))
+
+pedestrian %>%
+  ggplot(aes(E,N, colour=TrajID)) +
+  geom_path() + 
+  geom_point() +
+  coord_equal() +
+  facet_wrap(vars(TrajID), labeller=label_both) +
+  labs(title="Visual comparison of the 6 trajectories")
+  
+## Colors don't work with all kinds of: scale_fill_distiller(palette="Spectral")
