@@ -118,14 +118,9 @@ help(package = "SimilarityMeasures")
 
 pedestrian_new <- pedestrian %>%
   group_by(TrajID) %>%
-  summarise(dim=sqrt((E-lead(E,1))^2+(N-lead(N,1))^2))
+  mutate(distance=sqrt((E-lead(E,1))^2+(N-lead(N,1))^2)) %>%
+  select(TrajID,distance, DatetimeUTC) %>%
+  pivot_wider(everything(), names_from=TrajID,values_from=distance)
 
-traj1 <- pedestrian_new %>%
-  filter(TrajID==1)
-traj1 <- as.matrix(traj1)
-
-traj2 <- pedestrian_new %>%
-  filter(TrajID==2)
-traj2 <- as.matrix(traj2)
-
-SimilarityMeasures::DTW(traj1,traj2,pointSpacing=-1)
+SimilarityMeasures::DTW(pedestrian_new$`1`,pedestrian_new$`2`,pointSpacing = -1)
+#not yet finished
