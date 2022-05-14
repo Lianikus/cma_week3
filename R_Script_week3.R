@@ -113,14 +113,53 @@ pedestrian %>%
 ## Colors don't work with all kinds of: scale_fill_distiller(palette="Spectral")
 
 #Task 6
-install.packages("SimilarityMeasures")
-help(package = "SimilarityMeasures")
+#install.packages("SimilarityMeasures")
+library(SimilarityMeasures)
 
-pedestrian_new <- pedestrian %>%
-  group_by(TrajID) %>%
-  mutate(distance=sqrt((E-lead(E,1))^2+(N-lead(N,1))^2)) %>%
-  select(TrajID,distance, DatetimeUTC) %>%
-  pivot_wider(everything(), names_from=TrajID,values_from=distance)
+# Create matrix for every trajectory without time
+pedestrian.1.m <- as.matrix(filter(pedestrian[,1:3], TrajID == 1))
+pedestrian.2.m <- as.matrix(filter(pedestrian[,1:3], TrajID == 2))
+pedestrian.3.m <- as.matrix(filter(pedestrian[,1:3], TrajID == 3))
+pedestrian.4.m <- as.matrix(filter(pedestrian[,1:3], TrajID == 4))
+pedestrian.5.m <- as.matrix(filter(pedestrian[,1:3], TrajID == 5))
+pedestrian.6.m <- as.matrix(filter(pedestrian[,1:3], TrajID == 6))
 
-SimilarityMeasures::DTW(pedestrian_new$`1`,pedestrian_new$`2`,pointSpacing = -1)
-#not yet finished
+# Calculate the Measures and store the results in a DF
+Sililarity <- data.frame(ID = seq(1:6),
+                         DTW = c(DTW(pedestrian.1.m, pedestrian.1.m),
+                                 DTW(pedestrian.1.m, pedestrian.2.m),
+                                 DTW(pedestrian.1.m, pedestrian.3.m),
+                                 DTW(pedestrian.1.m, pedestrian.4.m),
+                                 DTW(pedestrian.1.m, pedestrian.5.m),
+                                 DTW(pedestrian.1.m, pedestrian.6.m)),
+                         EditDist = c(EditDist(pedestrian.1.m, pedestrian.1.m),
+                                      EditDist(pedestrian.1.m, pedestrian.2.m),
+                                      EditDist(pedestrian.1.m, pedestrian.3.m),
+                                      EditDist(pedestrian.1.m, pedestrian.4.m),
+                                      EditDist(pedestrian.1.m, pedestrian.5.m),
+                                      EditDist(pedestrian.1.m, pedestrian.6.m)),
+                         Frechet = c(Frechet(pedestrian.1.m, pedestrian.1.m),
+                                     Frechet(pedestrian.1.m, pedestrian.2.m),
+                                     Frechet(pedestrian.1.m, pedestrian.3.m),
+                                     Frechet(pedestrian.1.m, pedestrian.4.m),
+                                     Frechet(pedestrian.1.m, pedestrian.5.m),
+                                     Frechet(pedestrian.1.m, pedestrian.6.m)),
+                         LCSS = c(LCSS(pedestrian.1.m, pedestrian.1.m, pointDistance = 20, pointSpacing = 0, errorMarg = 1),
+                                  LCSS(pedestrian.1.m, pedestrian.2.m, pointDistance = 20, pointSpacing = 0, errorMarg = 1),
+                                  LCSS(pedestrian.1.m, pedestrian.3.m, pointDistance = 20, pointSpacing = 0, errorMarg = 1),
+                                  LCSS(pedestrian.1.m, pedestrian.4.m, pointDistance = 20, pointSpacing = 0, errorMarg = 1),
+                                  LCSS(pedestrian.1.m, pedestrian.5.m, pointDistance = 20, pointSpacing = 0, errorMarg = 1),
+                                  LCSS(pedestrian.1.m, pedestrian.6.m, pointDistance = 20, pointSpacing = 0, errorMarg = 1)))
+
+
+# Long-Format
+Sililarity_long <- gather(Sililarity, Measure, Value, DTW : LCSS)
+
+# Plot results
+ggplot(Sililarity_long, aes(as.factor(ID), Value, fill = as.factor(ID))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~Measure, scales = "free_y") +
+  theme_bw() +
+  theme(legend.position = "none") +
+  labs(title = "Computed similarities using different measures \nbetween trajectory 1 and all the others",
+       y = "Value\n", x = "\nComparison trajectory")
